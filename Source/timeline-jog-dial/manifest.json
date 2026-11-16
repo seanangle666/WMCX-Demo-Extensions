@@ -1,0 +1,18 @@
+{
+  "id": "com.wmcx.timeline-jog-dial",
+  "name": "時間軸微調旋鈕",
+  "version": "1.0.0",
+  "description": "在畫面右側提供觸控飛梭旋鈕，方便於手機或平板精細微調譜面時間軸。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "playback:read",
+    "playback:seek",
+    "ui:menu",
+    "ui:popover",
+    "ui:overlay",
+    "ui:toast",
+    "i18n:register"
+  ]
+}
+

@@ -1,0 +1,20 @@
+{
+  "id": "com.wmcx.chart-density-indicator",
+  "name": "物量密度指示器",
+  "version": "1.0.0",
+  "description": "讀取譜面解析快照計算音符密度，提供可拖動懸浮視窗與時間軸拖曳跳轉功能。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "chart:read",
+    "playback:read",
+    "playback:seek",
+    "events:subscribe",
+    "ui:menu",
+    "ui:popover",
+    "ui:overlay",
+    "ui:toast",
+    "i18n:register"
+  ]
+}
+

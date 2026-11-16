@@ -1,0 +1,18 @@
+{
+  "id": "com.wmcx.chart-info-card",
+  "name": "左上角譜面資訊卡",
+  "version": "1.0.0",
+  "description": "在主畫布左上角顯示封面圖、曲名、作曲、譜師名、難度與難度顏色，並支援設定是否於匯出影片中顯示。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "chart:read",
+    "view:read",
+    "render:overlay",
+    "events:subscribe",
+    "ui:menu",
+    "ui:popover",
+    "ui:toast",
+    "i18n:register"
+  ]
+}

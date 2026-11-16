@@ -43,6 +43,46 @@
             "description": "在編輯器畫面上提供鐵鎚、機槍、油漆彈、電鋸與火焰等純視覺破壞特效工具。",
             "file": "Extensions/screen-destroyer-1.0.0.zip",
             "sha256": "e45e97ef1b5f96dd51b3248e771f11ed74f13cf0c119a9bd8396688f3cfed621"
+        },
+        {
+            "id": "com.wmcx.ai-chart-assistant",
+            "name": "AI 譜面補全助手",
+            "version": "1.0.0",
+            "description": "串接 Google Gemini API 提供 simai 譜面行內補全建議，並透過浮動氣泡快速接受或取消。",
+            "file": "Extensions/ai-chart-assistant-1.0.0.zip",
+            "sha256": "9d6e7a1889cc31b90b06402c2672d811d89df61d57c0a797db8d9982c8c19122"
+        },
+        {
+            "id": "com.wmcx.chart-density-indicator",
+            "name": "物量密度指示器",
+            "version": "1.0.0",
+            "description": "讀取譜面解析快照計算音符密度，提供可拖動懸浮視窗與時間軸拖曳跳轉功能。",
+            "file": "Extensions/chart-density-indicator-1.0.0.zip",
+            "sha256": "e10bbf3a1a614744e8a7a04ec41bc5e7e8660c72f90a268156407ff8a5811c2f"
+        },
+        {
+            "id": "com.wmcx.chart-info-card",
+            "name": "左上角譜面資訊卡",
+            "version": "1.0.0",
+            "description": "在主畫布左上角顯示封面圖、曲名、作曲、譜師名、難度與難度顏色，並支援設定是否於匯出影片中顯示。",
+            "file": "Extensions/chart-info-card-1.0.0.zip",
+            "sha256": "e9c6ed5ac08945b4923c0fd14b971181ce130d65d0b0d52b7d834b8955c8c365"
+        },
+        {
+            "id": "com.wmcx.custom-notes-plus",
+            "name": "自訂音符Plus",
+            "version": "1.0.0",
+            "description": "自由手選本機圖片覆寫所有音符與特效貼圖，支援分類篩選、一鍵套用全部、單項還原與自動記憶保存。",
+            "file": "Extensions/custom-notes-plus-1.0.0.zip",
+            "sha256": "b208944a08e50d99cce6fe3b833aac08d47115299d09bb9933686d2a5378e375"
+        },
+        {
+            "id": "com.wmcx.timeline-jog-dial",
+            "name": "時間軸微調旋鈕",
+            "version": "1.0.0",
+            "description": "在畫面右側提供觸控飛梭旋鈕，方便於手機或平板精細微調譜面時間軸。",
+            "file": "Extensions/timeline-jog-dial-1.0.0.zip",
+            "sha256": "d650dae59eb41bfdd18b977f1e54b626a4f584271c078b023c7cc2552ed57c88"
         }
     ]
 }

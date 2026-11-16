@@ -1,0 +1,18 @@
+{
+  "id": "com.wmcx.ai-chart-assistant",
+  "name": "AI 譜面補全助手",
+  "version": "1.0.0",
+  "description": "串接 Google Gemini API 提供 simai 譜面行內補全建議，並透過浮動氣泡快速接受或取消。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "editor:read",
+    "editor:write",
+    "ui:menu",
+    "ui:popover",
+    "ui:overlay",
+    "ui:toast",
+    "i18n:register"
+  ]
+}
+

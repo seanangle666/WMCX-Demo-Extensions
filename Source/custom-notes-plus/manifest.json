@@ -1,0 +1,16 @@
+{
+  "id": "com.wmcx.custom-notes-plus",
+  "name": "自訂音符Plus",
+  "version": "1.0.0",
+  "description": "自由手選本機圖片覆寫所有音符與特效貼圖，支援分類篩選、一鍵套用全部、單項還原與自動記憶保存。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "assets:read",
+    "assets:override",
+    "ui:menu",
+    "ui:overlay",
+    "ui:toast",
+    "storage"
+  ]
+}
