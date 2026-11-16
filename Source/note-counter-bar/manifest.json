@@ -1,0 +1,19 @@
+{
+  "id": "com.wmcx.note-counter-bar",
+  "name": "音符物量橫條",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "description": "在畫面上顯示當前譜面各種音符物量的可拖動橫條。",
+  "author": "WMCX Extension",
+  "entry": "index.js",
+  "runtime": "trusted",
+  "permissions": [
+    "chart:read",
+    "events:subscribe",
+    "ui:overlay",
+    "ui:menu",
+    "ui:popover",
+    "storage",
+    "i18n:register"
+  ]
+}

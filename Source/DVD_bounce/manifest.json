@@ -1,0 +1,16 @@
+{
+  "id": "com.wmcx.dvd-bounce",
+  "name": "DVD 彈跳標誌",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "description": "在譜面畫布舞台區域內彈跳並於撞邊時變色的 DVD 標誌疊加圖層。",
+  "author": "WMCX Extension",
+  "entry": "index.js",
+  "runtime": "trusted",
+  "permissions": [
+    "render:overlay",
+    "ui:menu",
+    "ui:popover",
+    "i18n:register"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "com.wmcx.chart-brush",
+  "name": "譜面暫停繪圖筆刷",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "description": "於譜面暫停狀態提供多種筆刷與橡皮擦進行標記繪圖，開始播放時自動清除。",
+  "author": "WMCX Extension",
+  "entry": "index.js",
+  "runtime": "trusted",
+  "permissions": [
+    "playback:read",
+    "events:subscribe",
+    "ui:overlay",
+    "ui:menu",
+    "ui:popover",
+    "ui:toast",
+    "i18n:register"
+  ]
+}

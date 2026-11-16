@@ -1,0 +1,17 @@
+{
+  "id": "com.wmcx.bouncing-pet",
+  "name": "彈彈桌寵",
+  "version": "1.0.0",
+  "description": "可自由拖曳且可匯入自訂 PNG 圖片的 Q 彈跳動桌寵掛件。",
+  "author": "WMCX Example",
+  "entry": "index.js",
+  "permissions": [
+    "ui:overlay",
+    "ui:menu",
+    "ui:popover",
+    "ui:toast",
+    "i18n:register",
+    "storage"
+  ]
+}
+

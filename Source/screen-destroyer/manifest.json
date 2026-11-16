@@ -1,0 +1,17 @@
+{
+  "id": "com.wmcx.screen-destroyer",
+  "name": "螢幕破壞程式",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "description": "在編輯器畫面上提供鐵鎚、機槍、油漆彈、電鋸與火焰等純視覺破壞特效工具。",
+  "author": "WMCX Extension",
+  "entry": "index.js",
+  "runtime": "trusted",
+  "permissions": [
+    "ui:overlay",
+    "ui:menu",
+    "ui:popover",
+    "ui:toast",
+    "i18n:register"
+  ]
+}

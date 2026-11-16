@@ -1,0 +1,48 @@
+{
+    "schemaVersion": 1,
+    "name": "WMCX Example Extensions",
+    "identifier": "com.wmcx.extensions",
+    "description": "Web mai Chart X 自訂擴充程式集合",
+    "extensions": [
+        {
+            "id": "com.wmcx.bouncing-pet",
+            "name": "彈彈桌寵",
+            "version": "1.0.0",
+            "description": "可自由拖曳且可匯入自訂 PNG 圖片的 Q 彈跳動桌寵掛件。",
+            "file": "Extensions/bouncing-pet-1.0.0.zip",
+            "sha256": "ca5a9dee6e0eee384567c82c07b81fa82e07024f0bc6d4797c00c3ff34586136"
+        },
+        {
+            "id": "com.wmcx.chart-brush",
+            "name": "譜面暫停繪圖筆刷",
+            "version": "1.0.0",
+            "description": "於譜面暫停狀態提供多種筆刷與橡皮擦進行標記繪圖，開始播放時自動清除。",
+            "file": "Extensions/chart-brush-1.0.0.zip",
+            "sha256": "bf6cb593970bb3f57e03e25eb5d4d6056d2d35d3df0c39a781e154ce7bb72518"
+        },
+        {
+            "id": "com.wmcx.dvd-bounce",
+            "name": "DVD 彈跳標誌",
+            "version": "1.0.0",
+            "description": "在譜面畫布舞台區域內彈跳並於撞邊時變色的 DVD 標誌疊加圖層。",
+            "file": "Extensions/dvd-bounce-1.0.0.zip",
+            "sha256": "555608feb2240dded7f472a71742bd3260dcdf66cdc4287d914389bc43077b7e"
+        },
+        {
+            "id": "com.wmcx.note-counter-bar",
+            "name": "音符物量橫條",
+            "version": "1.0.0",
+            "description": "在畫面上顯示當前譜面各種音符物量的可拖動橫條。",
+            "file": "Extensions/note-counter-bar-1.0.0.zip",
+            "sha256": "909651190c685c01a54187fb506890c3f56e251d93259d22d6e4810f973678fe"
+        },
+        {
+            "id": "com.wmcx.screen-destroyer",
+            "name": "螢幕破壞程式",
+            "version": "1.0.0",
+            "description": "在編輯器畫面上提供鐵鎚、機槍、油漆彈、電鋸與火焰等純視覺破壞特效工具。",
+            "file": "Extensions/screen-destroyer-1.0.0.zip",
+            "sha256": "e45e97ef1b5f96dd51b3248e771f11ed74f13cf0c119a9bd8396688f3cfed621"
+        }
+    ]
+}
