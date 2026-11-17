@@ -79,10 +79,10 @@
         {
             "id": "com.wmcx.timeline-jog-dial",
             "name": "時間軸微調旋鈕",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "description": "在畫面右側提供觸控飛梭旋鈕，方便於手機或平板精細微調譜面時間軸。",
-            "file": "Extensions/timeline-jog-dial-1.0.0.zip",
-            "sha256": "d650dae59eb41bfdd18b977f1e54b626a4f584271c078b023c7cc2552ed57c88"
+            "file": "Extensions/timeline-jog-dial-1.1.0.zip",
+            "sha256": "3a30ee470d307474d69ec94bdf70f2808e17ddb7f4875af3f71b65183984a7ff"
         },
         {
             "id": "com.wmcx.slidecode-explainer",
