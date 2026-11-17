@@ -1,8 +1,8 @@
 {
     "schemaVersion": 1,
-    "name": "WMCX Example Extensions",
+    "name": "WMCX 示範擴充功能",
     "identifier": "com.wmcx.extensions",
-    "description": "Web mai Chart X 自訂擴充程式集合",
+    "description": "Web mai Chart X 官方的擴充功能",
     "extensions": [
         {
             "id": "com.wmcx.bouncing-pet",
@@ -83,6 +83,22 @@
             "description": "在畫面右側提供觸控飛梭旋鈕，方便於手機或平板精細微調譜面時間軸。",
             "file": "Extensions/timeline-jog-dial-1.0.0.zip",
             "sha256": "d650dae59eb41bfdd18b977f1e54b626a4f584271c078b023c7cc2552ed57c88"
+        },
+        {
+            "id": "com.wmcx.slidecode-explainer",
+            "name": "Slide Code 相容與詳解",
+            "version": "1.1.0",
+            "description": "於譜面中直接相容 MajSimai Slide Code 語法，依時間軸於主畫布繪製滑星與軌跡箭頭，並提供語法展開、合法性檢查與判定隊列詳解。",
+            "file": "Extensions/slidecode-explainer-1.1.0.zip",
+            "sha256": "6931952626731b86fae211ce77c56edd4a121487c1caacec75da96a6294910a1"
+        },
+        {
+            "id": "com.wmcx.video-blur-border",
+            "name": "外圍影片模糊背景",
+            "version": "1.0.0",
+            "description": "讀取本機影片並於離屏畫布進行降解析度模糊處理，將中央判定圓挖空後繪製於外圍舞台區域，支援即時預覽與高效率逐幀影片匯出。",
+            "file": "Extensions/video-blur-border-1.0.0.zip",
+            "sha256": "ffd8205ebded5e3f3facb9bb5a8503c1883aacdd7f0bd99fb8d12bf5cbae99c0"
         }
     ]
 }

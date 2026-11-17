@@ -1,0 +1,19 @@
+{
+  "id": "com.wmcx.video-blur-border",
+  "name": "外圍影片模糊背景",
+  "version": "1.0.0",
+  "description": "讀取本機影片並於離屏畫布進行降解析度模糊處理，將中央判定圓挖空後繪製於外圍舞台區域，支援即時預覽與高效率逐幀影片匯出。",
+  "author": "WMCX Community",
+  "entry": "index.js",
+  "permissions": [
+    "render:overlay",
+    "settings:override",
+    "events:subscribe",
+    "playback:read",
+    "commands:register",
+    "ui:menu",
+    "ui:popover",
+    "ui:toast",
+    "i18n:register"
+  ]
+}
