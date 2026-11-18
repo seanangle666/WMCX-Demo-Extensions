@@ -1,7 +1,7 @@
 {
   "id": "com.wmcx.slidecode-explainer",
   "name": "Slide Code 相容與詳解",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "於譜面中直接相容 MajSimai Slide Code 語法，依時間軸於主畫布繪製滑星與軌跡箭頭，並提供語法展開、合法性檢查與判定隊列詳解。",
   "author": "WMCX Community",
   "entry": "index.js",

@@ -185,6 +185,22 @@ const TRANSLATIONS = {
 const NODE_OPS = new Set(['X', 'A', 'B', 'C', 'K']);
 const TRACK_OPS = new Set(['P', 'Q']);
 
+const PREVIEW_COLORS = {
+    star: '#00B9F7',
+    double: '#FFDF00',
+    break: '#FF640D',
+    slide: '#00FBFC'
+};
+
+const PREVIEW_STAR_GEOMETRY = Array.from({ length: 10 }, (_, i) => {
+    const angle = (i * Math.PI) / 5 - Math.PI / 2;
+    const rRatio = i % 2 === 0 ? 1.0 : 0.4;
+    return {
+        cos: Math.cos(angle) * rRatio,
+        sin: Math.sin(angle) * rRatio
+    };
+});
+
 // --- 圖片載入與快取 ---
 
 function loadSkinImages() {
@@ -1675,6 +1691,79 @@ export default function activate(ctx) {
                 }
                 c.restore();
             }
+        }
+    });
+
+    ctx.render?.registerOverlay({
+        target: 'preview',
+        phase: 'afterNoteObjects',
+        order: 20,
+        draw(rc) {
+            if (!settings.chartPlaybackEnabled || chartSlides.length === 0) return;
+
+            const c = rc.ctx;
+            const w = rc.width;
+            const h = rc.height;
+            const hw = w * 0.5;
+            const zoom = rc.unitPx || rc.scale || 1;
+            const size = 0.1 * h;
+            if (size <= 0 || w <= 0 || h <= 0) return;
+
+            const globalTime = Number.isFinite(rc.globalTime)
+                ? rc.globalTime
+                : (ctx.playback?.getState?.().globalTime ?? 0);
+
+            // 先繪製滑條虛線，再繪製進場星星頭，與主程式 SimaiPreviewRenderer 圖層順序一致
+            c.save();
+            c.lineWidth = size;
+            c.setLineDash([size * 0.4, size * 0.3]);
+            for (let sIdx = 0; sIdx < chartSlides.length; sIdx++) {
+                const s = chartSlides[sIdx];
+                const slideWidth = s.slideDuration * zoom;
+                if (slideWidth < 1e-4) continue;
+
+                const sx = hw + (s.time + s.slideDelay - globalTime) * zoom;
+                if (sx + slideWidth < -size || sx > w + size) continue;
+
+                const y = (s.startButton - 0.5) / 8 * h;
+                c.strokeStyle = s.isSlideBreak
+                    ? PREVIEW_COLORS.break
+                    : (s.isSlideDouble ? PREVIEW_COLORS.double : PREVIEW_COLORS.slide);
+                c.beginPath();
+                c.moveTo(sx, y);
+                c.lineTo(sx + slideWidth, y);
+                c.stroke();
+            }
+            c.restore();
+
+            if (!settings.renderApproachHead) return;
+
+            const starSize = size * 0.9;
+            c.save();
+            c.lineWidth = starSize * 0.35;
+            for (let sIdx = 0; sIdx < chartSlides.length; sIdx++) {
+                const s = chartSlides[sIdx];
+                if (s.noHead || s.hideHead) continue;
+
+                const cx = hw + (s.time - globalTime) * zoom;
+                if (cx < -starSize * 2 || cx > w + starSize * 2) continue;
+
+                const y = (s.startButton - 0.5) / 8 * h;
+                c.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const geom = PREVIEW_STAR_GEOMETRY[i];
+                    const px = cx + geom.cos * starSize;
+                    const py = y + geom.sin * starSize;
+                    if (i === 0) c.moveTo(px, py);
+                    else c.lineTo(px, py);
+                }
+                c.closePath();
+                c.strokeStyle = s.isHeadBreak
+                    ? PREVIEW_COLORS.break
+                    : ((s.isHeadDouble || s.isMultiple) ? PREVIEW_COLORS.double : PREVIEW_COLORS.star);
+                c.stroke();
+            }
+            c.restore();
         }
     });
 
