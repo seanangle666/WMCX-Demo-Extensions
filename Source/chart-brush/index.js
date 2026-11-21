@@ -3,13 +3,16 @@ const MAX_HISTORY = 20;
 const VIEWPORT_MARGIN = 8;
 
 const TOOLS = [
-    { id: 'pen', labelKey: 'toolPen', fallback: '實線筆' },
-    { id: 'highlighter', labelKey: 'toolHighlighter', fallback: '螢光筆' },
-    { id: 'dashed', labelKey: 'toolDashed', fallback: '虛線筆' },
-    { id: 'spray', labelKey: 'toolSpray', fallback: '噴漆' },
-    { id: 'arrow', labelKey: 'toolArrow', fallback: '箭頭' },
-    { id: 'rainbow', labelKey: 'toolRainbow', fallback: '彩虹' },
-    { id: 'eraser', labelKey: 'toolEraser', fallback: '橡皮擦' }
+    { id: 'pen', icon: 'draw', labelKey: 'toolPen', fallback: '實線筆' },
+    { id: 'highlighter', icon: 'ink_highlighter', labelKey: 'toolHighlighter', fallback: '螢光筆' },
+    { id: 'eraser', icon: 'ink_eraser', labelKey: 'toolEraser', fallback: '橡皮擦' }
+];
+
+const SHAPES = [
+    { id: 'line', icon: 'horizontal_rule', labelKey: 'shapeLine', fallback: '直線' },
+    { id: 'arrow', icon: 'north_east', labelKey: 'shapeArrow', fallback: '箭頭' },
+    { id: 'rect', icon: 'crop_square', labelKey: 'shapeRect', fallback: '矩形' },
+    { id: 'circle', icon: 'radio_button_unchecked', labelKey: 'shapeCircle', fallback: '圓形' }
 ];
 
 const PRESET_COLORS = [
@@ -21,6 +24,8 @@ const PRESET_COLORS = [
     '#f472b6',
     '#ffffff'
 ];
+
+const PRESET_SIZES = [2, 4, 6, 10, 16, 24, 36];
 
 const SETTINGS_SCHEMA = [
     {
@@ -46,6 +51,13 @@ const SETTINGS_SCHEMA = [
         default: true,
         label: '顯示浮動繪圖工具列',
         labelKey: `ext.${EXTENSION_ID}.optShowToolbar`
+    },
+    {
+        key: 'allowDrawWhilePlaying',
+        type: 'boolean',
+        default: false,
+        label: '播放時允許繪製',
+        labelKey: `ext.${EXTENSION_ID}.optAllowDrawWhilePlaying`
     }
 ];
 
@@ -54,21 +66,27 @@ const TRANSLATIONS = {
         menuToggleBar: '顯示或隱藏工具列',
         menuClear: '清除繪圖畫布',
         menuSettings: '筆刷設定',
-        settingsTitle: '譜面暫停繪圖筆刷設定',
+        settingsTitle: '畫筆工具設定',
         optDefaultSize: '預設筆刷粗細',
         optClearOnPlay: '開始播放時自動清除',
         optShowToolbar: '顯示浮動繪圖工具列',
+        optAllowDrawWhilePlaying: '播放時允許繪製',
         drawOn: '繪圖：開',
         drawOff: '繪圖：關',
         toolPen: '實線筆',
         toolHighlighter: '螢光筆',
-        toolDashed: '虛線筆',
-        toolSpray: '噴漆',
-        toolArrow: '箭頭',
-        toolRainbow: '彩虹',
         toolEraser: '橡皮擦',
+        btnShape: '形狀',
+        shapeLine: '直線',
+        shapeArrow: '箭頭',
+        shapeRect: '矩形',
+        shapeCircle: '圓形',
         btnUndo: '復原',
         btnClear: '清除',
+        btnColor: '筆刷顏色',
+        btnSize: '筆刷粗細',
+        btnMinimize: '最小化工具列',
+        btnRestore: '展開繪圖工具列',
         toastNeedPause: '播放中無法繪圖，請先暫停譜面',
         toastPausedMode: '已暫停繪圖模式',
         toastActiveMode: '已開啟繪圖模式，按 Esc 可暫停並操作編輯器',
@@ -78,21 +96,27 @@ const TRANSLATIONS = {
         menuToggleBar: 'Toggle Drawing Toolbar',
         menuClear: 'Clear Drawing Canvas',
         menuSettings: 'Brush Settings',
-        settingsTitle: 'Chart Pause Brush Settings',
+        settingsTitle: 'Brush Tool Settings',
         optDefaultSize: 'Default Brush Size',
         optClearOnPlay: 'Auto Clear on Play',
         optShowToolbar: 'Show Floating Toolbar',
+        optAllowDrawWhilePlaying: 'Allow Drawing While Playing',
         drawOn: 'Draw: ON',
         drawOff: 'Draw: OFF',
         toolPen: 'Pen',
         toolHighlighter: 'Highlighter',
-        toolDashed: 'Dashed',
-        toolSpray: 'Spray',
-        toolArrow: 'Arrow',
-        toolRainbow: 'Rainbow',
         toolEraser: 'Eraser',
+        btnShape: 'Shapes',
+        shapeLine: 'Line',
+        shapeArrow: 'Arrow',
+        shapeRect: 'Rectangle',
+        shapeCircle: 'Circle',
         btnUndo: 'Undo',
         btnClear: 'Clear',
+        btnColor: 'Brush Color',
+        btnSize: 'Brush Size',
+        btnMinimize: 'Minimize Toolbar',
+        btnRestore: 'Expand Drawing Toolbar',
         toastNeedPause: 'Pause playback before drawing',
         toastPausedMode: 'Drawing mode paused',
         toastActiveMode: 'Drawing mode enabled, press Esc to pause',
@@ -166,8 +190,43 @@ function drawArrow(ctx2d, x1, y1, x2, y2, lineWidth, color) {
     ctx2d.restore();
 }
 
+const MATERIAL_SYMBOLS_URL = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200';
+
+function ensureMaterialSymbolsFont() {
+    if (typeof document === 'undefined' || !document.head) return;
+    const existing = document.head.querySelector('link[data-chart-brush-ms="1"]');
+    if (existing) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = MATERIAL_SYMBOLS_URL;
+    link.dataset.chartBrushMs = '1';
+    document.head.appendChild(link);
+}
+
+function createMaterialIcon(name, className = 'ms-icon') {
+    const span = document.createElement('span');
+    span.className = className;
+    span.setAttribute('aria-hidden', 'true');
+    span.setAttribute('translate', 'no');
+    span.textContent = name;
+    return span;
+}
+
+function createCornerArrow() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'corner-arrow');
+    svg.setAttribute('viewBox', '0 0 6 6');
+    svg.setAttribute('aria-hidden', 'true');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('points', '0,0 6,0 0,6');
+    poly.setAttribute('fill', 'currentColor');
+    svg.appendChild(poly);
+    return svg;
+}
+
 export default function activate(ctx) {
     ctx.i18n.registerTranslations(TRANSLATIONS);
+    ensureMaterialSymbolsFont();
 
     const widget = ctx.ui.createFloatingWidget({
         id: 'chart-brush',
@@ -180,7 +239,18 @@ export default function activate(ctx) {
     const shadow = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = `
+        @import url('${MATERIAL_SYMBOLS_URL}');
+
         :host {
+            --cb-main-color: #131313;
+            --cb-active-bg: #484852;
+            --cb-hover-bg: rgba(255, 255, 255, 0.08);
+            --cb-icon-muted: rgba(255, 255, 255, 0.6);
+            --cb-icon-hover: rgba(255, 255, 255, 0.95);
+            --cb-text: #ffffff;
+            --cb-draw-on: #ffffff;
+            --cb-draw-on-text: #000000;
+            --cb-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.25);
             display: block;
             user-select: none;
             -webkit-user-select: none;
@@ -188,8 +258,8 @@ export default function activate(ctx) {
         canvas {
             position: fixed;
             inset: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             display: block;
             pointer-events: none;
         }
@@ -198,36 +268,61 @@ export default function activate(ctx) {
             cursor: crosshair;
             touch-action: none;
         }
+        .ms-icon {
+            font-family: 'Material Symbols Outlined', sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 32;
+            pointer-events: none;
+        }
         .toolbar {
             position: fixed;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: row;
+            flex-wrap: nowrap;
             align-items: center;
-            gap: 6px;
+            gap: 3px;
             max-width: calc(100vw - 16px);
-            padding: 6px 10px 6px 8px;
-            border-radius: 12px;
-            background: rgba(16, 20, 29, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            padding: 4px;
+            border-radius: 6px;
+            background: var(--cb-main-color);
+            border: none;
+            box-shadow: var(--cb-shadow);
             pointer-events: auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             font-size: 12px;
-            color: #f8fafc;
+            color: var(--cb-text);
+        }
+        .toolbar::-webkit-scrollbar,
+        .sub-popover::-webkit-scrollbar {
+            display: none;
         }
         .toolbar.hidden {
             display: none;
         }
         .grip {
+            flex-shrink: 0;
             display: grid;
             grid-template-columns: repeat(2, 3px);
             grid-template-rows: repeat(3, 3px);
             gap: 2px;
-            padding: 4px 3px;
+            padding: 6px 4px;
             cursor: grab;
-            opacity: 0.6;
+            opacity: 0.55;
             touch-action: none;
         }
         .grip:active {
@@ -237,84 +332,229 @@ export default function activate(ctx) {
             width: 3px;
             height: 3px;
             border-radius: 50%;
-            background: #cbd5e1;
+            background: rgba(255, 255, 255, 0.7);
         }
         .btn {
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(255, 255, 255, 0.06);
-            color: #e2e8f0;
-            border-radius: 8px;
-            padding: 4px 9px;
+            position: relative;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: transparent;
+            color: var(--cb-icon-muted);
+            border-radius: 4px;
+            padding: 0;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.15s ease, border-color 0.15s ease;
+            transition: all 0.15s ease;
+            touch-action: manipulation;
         }
         .btn:hover {
-            background: rgba(255, 255, 255, 0.14);
+            color: var(--cb-icon-hover);
+            background: var(--cb-hover-bg);
         }
-        .btn.active {
-            background: #2563eb;
-            border-color: #60a5fa;
-            color: #ffffff;
+        .btn.active,
+        .btn.menu-open {
+            background: var(--cb-active-bg);
+            color: var(--cb-text);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
         }
         .btn.draw-on {
-            background: #16a34a;
-            border-color: #4ade80;
-            color: #ffffff;
+            background: var(--cb-draw-on);
+            color: var(--cb-draw-on-text);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+        .btn.draw-on:hover {
+            background: #f0f0f0;
+            color: #000000;
         }
         .btn:disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             cursor: not-allowed;
         }
         .divider {
+            flex-shrink: 0;
             width: 1px;
             height: 18px;
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.12);
             margin: 0 2px;
         }
-        .colors {
+        .trigger-icon-slot {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
-        .swatch {
+        .corner-arrow {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 6px;
+            height: 6px;
+            pointer-events: none;
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .btn:hover .corner-arrow,
+        .btn.menu-open .corner-arrow {
+            color: #ffffff;
+        }
+        .color-dot {
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            border: 2px solid transparent;
-            padding: 0;
-            cursor: pointer;
-            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+            border: 1.5px solid rgba(255, 255, 255, 0.75);
+            flex-shrink: 0;
+            pointer-events: none;
         }
-        .swatch.active {
+        .size-badge {
+            font-size: 12px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+        }
+        .btn:hover .size-badge,
+        .btn.menu-open .size-badge {
+            color: #ffffff;
+        }
+        .sub-popover {
+            position: fixed;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 3px;
+            max-width: calc(100vw - 16px);
+            padding: 4px;
+            border-radius: 6px;
+            background: var(--cb-main-color);
+            border: none;
+            box-shadow: var(--cb-shadow);
+            pointer-events: auto;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 12px;
+            color: var(--cb-text);
+            animation: paletteSlideIn 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes paletteSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .sub-popover.hidden {
+            display: none;
+        }
+        .palette-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.15s ease;
+            touch-action: manipulation;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .palette-item:hover {
+            background: var(--cb-hover-bg);
+            color: var(--cb-text);
+        }
+        .palette-item.active {
+            background: var(--cb-active-bg);
+            color: var(--cb-text);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+        .swatch-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            pointer-events: none;
+        }
+        .palette-item.active .swatch-dot {
             border-color: #ffffff;
-            transform: scale(1.12);
         }
         .color-input {
-            width: 22px;
-            height: 22px;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
             border: none;
-            border-radius: 6px;
+            border-radius: 4px;
             padding: 0;
             background: transparent;
             cursor: pointer;
         }
-        .size-wrap {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
+        .size-chip-text {
+            font-size: 11px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            pointer-events: none;
         }
         .size-slider {
-            width: 68px;
-            accent-color: #38bdf8;
+            flex-shrink: 0;
+            width: 80px;
+            margin: 0 4px;
+            accent-color: #49e;
             cursor: pointer;
         }
         .size-val {
+            flex-shrink: 0;
             min-width: 22px;
+            padding-right: 4px;
             text-align: right;
             font-variant-numeric: tabular-nums;
-            color: #cbd5e1;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .mini-fab {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            background: #000000;
+            border: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 1px 4px rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            pointer-events: auto;
+            touch-action: none;
+            transition: color 0.15s ease, background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.1s ease;
+        }
+        .mini-fab:hover {
+            color: #ffffff;
+            background: #111111;
+        }
+        .mini-fab.draw-on {
+            box-shadow: 0 0 0 1.5px #ffffff, 0 4px 16px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+        }
+        .mini-fab.hidden {
+            display: none;
         }
     `;
 
@@ -340,6 +580,8 @@ export default function activate(ctx) {
     const modeBtn = document.createElement('button');
     modeBtn.type = 'button';
     modeBtn.className = 'btn';
+    const modeIcon = createMaterialIcon('edit');
+    modeBtn.appendChild(modeIcon);
 
     const div1 = document.createElement('span');
     div1.className = 'divider';
@@ -349,20 +591,85 @@ export default function activate(ctx) {
 
     for (let i = 0; i < TOOLS.length; i++) {
         const def = TOOLS[i];
+        const label = ctx.i18n.t(def.labelKey) || def.fallback;
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'btn';
-        btn.textContent = ctx.i18n.t(def.labelKey) || def.fallback;
-        btn.addEventListener('click', () => setActiveTool(def.id));
+        btn.setAttribute('aria-label', label);
+        btn.title = label;
+        btn.appendChild(createMaterialIcon(def.icon));
+        btn.addEventListener('click', () => {
+            closeSubPopover();
+            setActiveTool(def.id);
+        });
         toolBtns[def.id] = btn;
         toolbar.appendChild(btn);
+    }
+
+    const shapeBtn = document.createElement('button');
+    shapeBtn.type = 'button';
+    shapeBtn.className = 'btn';
+    shapeBtn.setAttribute('aria-label', ctx.i18n.t('btnShape'));
+    shapeBtn.title = ctx.i18n.t('btnShape');
+    const shapeSlot = document.createElement('span');
+    shapeSlot.className = 'trigger-icon-slot';
+    const shapeIcon = createMaterialIcon(SHAPES[0].icon);
+    shapeSlot.appendChild(shapeIcon);
+    shapeBtn.append(shapeSlot, createCornerArrow());
+    toolbar.appendChild(shapeBtn);
+
+    const shapePopover = document.createElement('div');
+    shapePopover.className = 'sub-popover hidden';
+    const shapeItemBtns = {};
+
+    for (let i = 0; i < SHAPES.length; i++) {
+        const def = SHAPES[i];
+        const label = ctx.i18n.t(def.labelKey) || def.fallback;
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'palette-item';
+        item.setAttribute('aria-label', label);
+        item.title = label;
+        item.appendChild(createMaterialIcon(def.icon));
+        item.addEventListener('click', () => {
+            activeShape = def.id;
+            shapeIcon.textContent = def.icon;
+            setActiveTool(def.id);
+            closeSubPopover();
+        });
+        shapeItemBtns[def.id] = item;
+        shapePopover.appendChild(item);
     }
 
     const div2 = document.createElement('span');
     div2.className = 'divider';
 
-    const colorsWrap = document.createElement('div');
-    colorsWrap.className = 'colors';
+    const colorBtn = document.createElement('button');
+    colorBtn.type = 'button';
+    colorBtn.className = 'btn';
+    colorBtn.setAttribute('aria-label', ctx.i18n.t('btnColor'));
+    colorBtn.title = ctx.i18n.t('btnColor');
+    const colorSlot = document.createElement('span');
+    colorSlot.className = 'trigger-icon-slot';
+    const colorDot = document.createElement('span');
+    colorDot.className = 'color-dot';
+    colorSlot.appendChild(colorDot);
+    colorBtn.append(colorSlot, createCornerArrow());
+
+    const sizeBtn = document.createElement('button');
+    sizeBtn.type = 'button';
+    sizeBtn.className = 'btn';
+    sizeBtn.setAttribute('aria-label', ctx.i18n.t('btnSize'));
+    sizeBtn.title = ctx.i18n.t('btnSize');
+    const sizeSlot = document.createElement('span');
+    sizeSlot.className = 'trigger-icon-slot';
+    const sizeBadge = document.createElement('span');
+    sizeBadge.className = 'size-badge';
+    sizeSlot.appendChild(sizeBadge);
+    sizeBtn.append(sizeSlot, createCornerArrow());
+
+    const colorPopover = document.createElement('div');
+    colorPopover.className = 'sub-popover hidden';
     const swatchBtns = [];
 
     const colorPicker = document.createElement('input');
@@ -374,20 +681,45 @@ export default function activate(ctx) {
         const hex = PRESET_COLORS[i];
         const sw = document.createElement('button');
         sw.type = 'button';
-        sw.className = 'swatch';
-        sw.style.backgroundColor = hex;
-        sw.addEventListener('click', () => setBrushColor(hex));
+        sw.className = 'palette-item';
+        const swDot = document.createElement('span');
+        swDot.className = 'swatch-dot';
+        swDot.style.backgroundColor = hex;
+        sw.appendChild(swDot);
+        sw.addEventListener('click', () => {
+            setBrushColor(hex);
+            closeSubPopover();
+        });
         swatchBtns.push({ hex, el: sw });
-        colorsWrap.appendChild(sw);
+        colorPopover.appendChild(sw);
     }
+    const pickerWrap = document.createElement('span');
+    pickerWrap.className = 'palette-item';
+    pickerWrap.appendChild(colorPicker);
     colorPicker.addEventListener('input', (e) => setBrushColor(e.target.value));
-    colorsWrap.appendChild(colorPicker);
+    colorPopover.appendChild(pickerWrap);
 
-    const div3 = document.createElement('span');
-    div3.className = 'divider';
+    const sizePopover = document.createElement('div');
+    sizePopover.className = 'sub-popover hidden';
+    const sizeChipBtns = [];
 
-    const sizeWrap = document.createElement('div');
-    sizeWrap.className = 'size-wrap';
+    for (let i = 0; i < PRESET_SIZES.length; i++) {
+        const sz = PRESET_SIZES[i];
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'palette-item';
+        const chipText = document.createElement('span');
+        chipText.className = 'size-chip-text';
+        chipText.textContent = String(sz);
+        chip.appendChild(chipText);
+        chip.addEventListener('click', () => {
+            setBrushSize(sz);
+            closeSubPopover();
+        });
+        sizeChipBtns.push({ size: sz, el: chip });
+        sizePopover.appendChild(chip);
+    }
+
     const sizeSlider = document.createElement('input');
     sizeSlider.type = 'range';
     sizeSlider.className = 'size-slider';
@@ -396,7 +728,7 @@ export default function activate(ctx) {
     sizeSlider.step = '1';
     const sizeVal = document.createElement('span');
     sizeVal.className = 'size-val';
-    sizeWrap.append(sizeSlider, sizeVal);
+    sizePopover.append(sizeSlider, sizeVal);
 
     const div4 = document.createElement('span');
     div4.className = 'divider';
@@ -404,44 +736,140 @@ export default function activate(ctx) {
     const undoBtn = document.createElement('button');
     undoBtn.type = 'button';
     undoBtn.className = 'btn';
-    undoBtn.textContent = ctx.i18n.t('btnUndo');
+    undoBtn.setAttribute('aria-label', ctx.i18n.t('btnUndo'));
+    undoBtn.title = ctx.i18n.t('btnUndo');
+    undoBtn.appendChild(createMaterialIcon('undo'));
 
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'btn';
-    clearBtn.textContent = ctx.i18n.t('btnClear');
+    clearBtn.setAttribute('aria-label', ctx.i18n.t('btnClear'));
+    clearBtn.title = ctx.i18n.t('btnClear');
+    clearBtn.appendChild(createMaterialIcon('delete_sweep'));
 
-    toolbar.append(div2, colorsWrap, div3, sizeWrap, div4, undoBtn, clearBtn);
-    shadow.append(style, drawCanvas, previewCanvas, toolbar);
+    const minimizeBtn = document.createElement('button');
+    minimizeBtn.type = 'button';
+    minimizeBtn.className = 'btn';
+    minimizeBtn.setAttribute('aria-label', ctx.i18n.t('btnMinimize'));
+    minimizeBtn.title = ctx.i18n.t('btnMinimize');
+    minimizeBtn.appendChild(createMaterialIcon('remove'));
+
+    const miniFab = document.createElement('button');
+    miniFab.type = 'button';
+    miniFab.className = 'mini-fab hidden';
+    miniFab.setAttribute('aria-label', ctx.i18n.t('btnRestore'));
+    miniFab.title = ctx.i18n.t('btnRestore');
+    miniFab.appendChild(createMaterialIcon('brush'));
+
+    toolbar.append(div2, colorBtn, sizeBtn, div4, undoBtn, clearBtn, minimizeBtn);
+    shadow.append(style, drawCanvas, previewCanvas, toolbar, shapePopover, colorPopover, sizePopover, miniFab);
 
     let settings = ctx.ui.getSettings(SETTINGS_SCHEMA);
     let drawMode = true;
     let activeTool = 'pen';
+    let activeShape = SHAPES[0].id;
     let brushColor = PRESET_COLORS[0];
     let brushSize = settings.defaultSize || 6;
-    let rainbowHue = 0;
+
+    let canvasWidth = Math.max(1, window.innerWidth);
+    let canvasHeight = Math.max(1, window.innerHeight);
 
     let isDrawing = false;
+    let activePointerId = null;
     let strokePoints = [];
     let lastX = 0;
     let lastY = 0;
     const history = [];
 
+    let isToolbarVisible = Boolean(settings.showToolbar);
+    let isMinimized = false;
+    let activePopover = null;
     let toolbarPos = null;
     let isDraggingBar = false;
     let barDragOffsetX = 0;
     let barDragOffsetY = 0;
+
+    let miniPos = null;
+    let isDraggingMini = false;
+    let miniPointerId = null;
+    let miniDragMoved = false;
+    let miniDragStartX = 0;
+    let miniDragStartY = 0;
+    let miniDragOffsetX = 0;
+    let miniDragOffsetY = 0;
 
     const isPlayingNow = () => {
         const st = ctx.playback.getState();
         return Boolean(st && st.isPlaying);
     };
 
+    const canDrawNow = () => drawMode && (Boolean(settings.allowDrawWhilePlaying) || !isPlayingNow());
+
+    const positionSubPopover = (popoverEl, anchorEl) => {
+        const anchorRect = anchorEl.getBoundingClientRect();
+        const barRect = toolbar.getBoundingClientRect();
+        const popRect = popoverEl.getBoundingClientRect();
+        const pw = popRect.width || 240;
+        const ph = popRect.height || 38;
+        const gap = 8;
+
+        let x = anchorRect.left + (anchorRect.width - pw) * 0.5;
+        x = clamp(x, VIEWPORT_MARGIN, Math.max(VIEWPORT_MARGIN, window.innerWidth - pw - VIEWPORT_MARGIN));
+
+        let y = barRect.top - ph - gap;
+        if (y < VIEWPORT_MARGIN) {
+            y = Math.min(window.innerHeight - ph - VIEWPORT_MARGIN, barRect.bottom + gap);
+        }
+        popoverEl.style.left = `${x}px`;
+        popoverEl.style.top = `${y}px`;
+    };
+
+    const closeSubPopover = () => {
+        activePopover = null;
+        shapePopover.classList.add('hidden');
+        colorPopover.classList.add('hidden');
+        sizePopover.classList.add('hidden');
+        shapeBtn.classList.remove('menu-open');
+        colorBtn.classList.remove('menu-open');
+        sizeBtn.classList.remove('menu-open');
+    };
+
+    const toggleSubPopover = (type) => {
+        if (activePopover === type) {
+            closeSubPopover();
+            return;
+        }
+        closeSubPopover();
+        activePopover = type;
+        const popMap = {
+            shape: { pop: shapePopover, btn: shapeBtn },
+            color: { pop: colorPopover, btn: colorBtn },
+            size: { pop: sizePopover, btn: sizeBtn }
+        };
+        const target = popMap[type];
+        if (!target) return;
+        target.pop.classList.remove('hidden');
+        target.btn.classList.add('menu-open');
+        positionSubPopover(target.pop, target.btn);
+    };
+
+    const syncToolbarVisibility = () => {
+        if (!isToolbarVisible || isMinimized) {
+            closeSubPopover();
+        }
+        toolbar.classList.toggle('hidden', !isToolbarVisible || isMinimized);
+        miniFab.classList.toggle('hidden', !isToolbarVisible || !isMinimized);
+    };
+
     const syncCanvasInteractive = () => {
-        const canDraw = drawMode && !isPlayingNow();
+        const canDraw = canDrawNow();
         previewCanvas.classList.toggle('active', canDraw);
         modeBtn.classList.toggle('draw-on', drawMode);
-        modeBtn.textContent = ctx.i18n.t(drawMode ? 'drawOn' : 'drawOff');
+        modeIcon.textContent = drawMode ? 'edit' : 'edit_off';
+        const modeLabel = ctx.i18n.t(drawMode ? 'drawOn' : 'drawOff');
+        modeBtn.setAttribute('aria-label', modeLabel);
+        modeBtn.title = modeLabel;
+        miniFab.classList.toggle('draw-on', drawMode);
     };
 
     const updateUndoState = () => {
@@ -465,11 +893,12 @@ export default function activate(ctx) {
     };
 
     const clearAll = (notify = false) => {
-        drawCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        previewCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        drawCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+        previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
         history.length = 0;
         strokePoints = [];
         isDrawing = false;
+        activePointerId = null;
         updateUndoState();
         if (notify) {
             ctx.ui.toast({ content: ctx.i18n.t('toastCleared'), type: 'info' });
@@ -489,6 +918,17 @@ export default function activate(ctx) {
         toolbar.style.top = `${clampedY}px`;
     };
 
+    const applyMiniPos = (x, y) => {
+        const size = 44;
+        const maxX = Math.max(VIEWPORT_MARGIN, window.innerWidth - size - VIEWPORT_MARGIN);
+        const maxY = Math.max(VIEWPORT_MARGIN, window.innerHeight - size - VIEWPORT_MARGIN);
+        const clampedX = clamp(x, VIEWPORT_MARGIN, maxX);
+        const clampedY = clamp(y, VIEWPORT_MARGIN, maxY);
+        miniPos = { x: clampedX, y: clampedY };
+        miniFab.style.left = `${clampedX}px`;
+        miniFab.style.top = `${clampedY}px`;
+    };
+
     const centerToolbarBottom = () => {
         const rect = toolbar.getBoundingClientRect();
         const w = rect.width || 560;
@@ -496,10 +936,23 @@ export default function activate(ctx) {
         applyToolbarPos((window.innerWidth - w) * 0.5, window.innerHeight - h - 14);
     };
 
+    const getCanvasPoint = (event) => {
+        const rect = previewCanvas.getBoundingClientRect();
+        const rw = rect.width || canvasWidth;
+        const rh = rect.height || canvasHeight;
+        return {
+            x: ((event.clientX - rect.left) * canvasWidth) / rw,
+            y: ((event.clientY - rect.top) * canvasHeight) / rh
+        };
+    };
+
     const resizeCanvases = () => {
         const dpr = Math.min(2, window.devicePixelRatio || 1);
-        const w = Math.max(1, window.innerWidth);
-        const h = Math.max(1, window.innerHeight);
+        const rect = previewCanvas.getBoundingClientRect();
+        const w = Math.max(1, Math.round(rect.width || window.innerWidth));
+        const h = Math.max(1, Math.round(rect.height || window.innerHeight));
+        canvasWidth = w;
+        canvasHeight = h;
 
         let snapshot = null;
         if (drawCanvas.width > 0 && drawCanvas.height > 0) {
@@ -527,7 +980,12 @@ export default function activate(ctx) {
         if (toolbarPos) {
             applyToolbarPos(toolbarPos.x, toolbarPos.y);
         }
+        if (miniPos) {
+            applyMiniPos(miniPos.x, miniPos.y);
+        }
     };
+
+    const isShapeTool = (toolId) => SHAPES.some((s) => s.id === toolId);
 
     const setActiveTool = (toolId) => {
         activeTool = toolId;
@@ -535,11 +993,17 @@ export default function activate(ctx) {
             const id = TOOLS[i].id;
             toolBtns[id].classList.toggle('active', id === toolId);
         }
+        shapeBtn.classList.toggle('active', isShapeTool(toolId));
+        for (let i = 0; i < SHAPES.length; i++) {
+            const id = SHAPES[i].id;
+            shapeItemBtns[id].classList.toggle('active', id === toolId);
+        }
     };
 
     const setBrushColor = (hex) => {
         brushColor = hex;
         colorPicker.value = hex;
+        colorDot.style.backgroundColor = hex;
         for (let i = 0; i < swatchBtns.length; i++) {
             swatchBtns[i].el.classList.toggle('active', swatchBtns[i].hex.toLowerCase() === hex.toLowerCase());
         }
@@ -549,16 +1013,53 @@ export default function activate(ctx) {
         brushSize = clamp(Number(val) || 6, 2, 36);
         sizeSlider.value = String(brushSize);
         sizeVal.textContent = String(brushSize);
+        sizeBadge.textContent = String(brushSize);
+        for (let i = 0; i < sizeChipBtns.length; i++) {
+            sizeChipBtns[i].el.classList.toggle('active', sizeChipBtns[i].size === brushSize);
+        }
     };
 
     const renderPreviewStroke = () => {
-        previewCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
         if (strokePoints.length === 0) return;
 
+        const first = strokePoints[0];
+        const last = strokePoints[strokePoints.length - 1];
+
         if (activeTool === 'arrow') {
-            const first = strokePoints[0];
-            const last = strokePoints[strokePoints.length - 1];
             drawArrow(previewCtx, first.x, first.y, last.x, last.y, brushSize, brushColor);
+            return;
+        }
+        if (activeTool === 'line') {
+            drawSegment(previewCtx, first.x, first.y, last.x, last.y, brushColor, brushSize, false);
+            return;
+        }
+        if (activeTool === 'rect') {
+            previewCtx.save();
+            previewCtx.strokeStyle = brushColor;
+            previewCtx.lineWidth = brushSize;
+            previewCtx.lineJoin = 'round';
+            previewCtx.strokeRect(
+                Math.min(first.x, last.x),
+                Math.min(first.y, last.y),
+                Math.abs(last.x - first.x),
+                Math.abs(last.y - first.y)
+            );
+            previewCtx.restore();
+            return;
+        }
+        if (activeTool === 'circle') {
+            const cx = (first.x + last.x) * 0.5;
+            const cy = (first.y + last.y) * 0.5;
+            const rx = Math.abs(last.x - first.x) * 0.5;
+            const ry = Math.abs(last.y - first.y) * 0.5;
+            previewCtx.save();
+            previewCtx.strokeStyle = brushColor;
+            previewCtx.lineWidth = brushSize;
+            previewCtx.beginPath();
+            previewCtx.ellipse(cx, cy, Math.max(0.5, rx), Math.max(0.5, ry), 0, 0, Math.PI * 2);
+            previewCtx.stroke();
+            previewCtx.restore();
             return;
         }
 
@@ -570,9 +1071,6 @@ export default function activate(ctx) {
         if (activeTool === 'highlighter') {
             previewCtx.globalAlpha = 0.36;
             previewCtx.lineWidth = Math.max(12, brushSize * 2.4);
-        } else if (activeTool === 'dashed') {
-            previewCtx.lineWidth = brushSize;
-            previewCtx.setLineDash([brushSize * 2.2, brushSize * 1.6]);
         } else {
             previewCtx.lineWidth = brushSize;
         }
@@ -580,23 +1078,6 @@ export default function activate(ctx) {
         traceSmoothPath(previewCtx, strokePoints);
         previewCtx.stroke();
         previewCtx.restore();
-    };
-
-    const drawSprayAt = (x, y) => {
-        const radius = Math.max(8, brushSize * 2);
-        const count = Math.max(14, Math.floor(brushSize * 2.2));
-        drawCtx.save();
-        drawCtx.fillStyle = brushColor;
-        drawCtx.globalAlpha = 0.45;
-        for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * radius;
-            const dotR = Math.max(0.8, brushSize * 0.14);
-            drawCtx.beginPath();
-            drawCtx.arc(x + Math.cos(angle) * dist, y + Math.sin(angle) * dist, dotR, 0, Math.PI * 2);
-            drawCtx.fill();
-        }
-        drawCtx.restore();
     };
 
     const drawSegment = (targetCtx, x1, y1, x2, y2, color, width, isEraser) => {
@@ -620,25 +1101,30 @@ export default function activate(ctx) {
     const onCanvasPointerDown = (event) => {
         if (!drawMode) return;
         if (event.button !== undefined && event.button !== 0) return;
+        if (isDrawing && activePointerId !== null && activePointerId !== event.pointerId) return;
 
-        if (isPlayingNow()) {
+        if (isPlayingNow() && !settings.allowDrawWhilePlaying) {
             ctx.ui.toast({ content: ctx.i18n.t('toastNeedPause'), type: 'warning' });
             syncCanvasInteractive();
             return;
         }
 
         isDrawing = true;
-        lastX = event.clientX;
-        lastY = event.clientY;
+        activePointerId = event.pointerId;
+        if (typeof previewCanvas.setPointerCapture === 'function') {
+            try {
+                previewCanvas.setPointerCapture(event.pointerId);
+            } catch {
+                // 忽略不支援指標捕獲的環境
+            }
+        }
+        const pt = getCanvasPoint(event);
+        lastX = pt.x;
+        lastY = pt.y;
         strokePoints = [{ x: lastX, y: lastY }];
         pushHistory();
 
-        if (activeTool === 'spray') {
-            drawSprayAt(lastX, lastY);
-        } else if (activeTool === 'rainbow') {
-            rainbowHue = (rainbowHue + 4) % 360;
-            drawSegment(drawCtx, lastX, lastY, lastX + 0.01, lastY + 0.01, `hsl(${rainbowHue}, 90%, 60%)`, brushSize, false);
-        } else if (activeTool === 'eraser') {
+        if (activeTool === 'eraser') {
             drawSegment(drawCtx, lastX, lastY, lastX + 0.01, lastY + 0.01, '#000', Math.max(10, brushSize * 2), true);
         } else {
             renderPreviewStroke();
@@ -647,18 +1133,13 @@ export default function activate(ctx) {
 
     const onCanvasPointerMove = (event) => {
         if (!isDrawing) return;
-        const x = event.clientX;
-        const y = event.clientY;
+        if (activePointerId !== null && event.pointerId !== activePointerId) return;
+        const { x, y } = getCanvasPoint(event);
 
-        if (activeTool === 'spray') {
-            drawSprayAt(x, y);
-        } else if (activeTool === 'rainbow') {
-            rainbowHue = (rainbowHue + 5) % 360;
-            drawSegment(drawCtx, lastX, lastY, x, y, `hsl(${rainbowHue}, 90%, 60%)`, brushSize, false);
-        } else if (activeTool === 'eraser') {
+        if (activeTool === 'eraser') {
             drawSegment(drawCtx, lastX, lastY, x, y, '#000', Math.max(10, brushSize * 2), true);
         } else {
-            if (activeTool === 'arrow') {
+            if (isShapeTool(activeTool)) {
                 strokePoints = [strokePoints[0], { x, y }];
             } else {
                 strokePoints.push({ x, y });
@@ -673,20 +1154,42 @@ export default function activate(ctx) {
     const finishStroke = () => {
         if (!isDrawing) return;
         isDrawing = false;
+        activePointerId = null;
 
-        if (activeTool !== 'spray' && activeTool !== 'rainbow' && activeTool !== 'eraser') {
-            drawCtx.drawImage(previewCanvas, 0, 0, window.innerWidth, window.innerHeight);
-            previewCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        if (activeTool !== 'eraser') {
+            drawCtx.drawImage(previewCanvas, 0, 0, canvasWidth, canvasHeight);
+            previewCtx.clearRect(0, 0, canvasWidth, canvasHeight);
         }
         strokePoints = [];
     };
 
     const onGripPointerDown = (event) => {
         if (event.button !== undefined && event.button !== 0) return;
+        closeSubPopover();
         const rect = toolbar.getBoundingClientRect();
         isDraggingBar = true;
         barDragOffsetX = event.clientX - rect.left;
         barDragOffsetY = event.clientY - rect.top;
+        event.preventDefault();
+    };
+
+    const onMiniPointerDown = (event) => {
+        if (event.button !== undefined && event.button !== 0) return;
+        const rect = miniFab.getBoundingClientRect();
+        isDraggingMini = true;
+        miniPointerId = event.pointerId;
+        miniDragMoved = false;
+        miniDragStartX = event.clientX;
+        miniDragStartY = event.clientY;
+        miniDragOffsetX = event.clientX - rect.left;
+        miniDragOffsetY = event.clientY - rect.top;
+        if (typeof miniFab.setPointerCapture === 'function') {
+            try {
+                miniFab.setPointerCapture(event.pointerId);
+            } catch {
+                // 忽略不支援指標捕獲的環境
+            }
+        }
         event.preventDefault();
     };
 
@@ -695,26 +1198,66 @@ export default function activate(ctx) {
             applyToolbarPos(event.clientX - barDragOffsetX, event.clientY - barDragOffsetY);
             return;
         }
+        if (isDraggingMini && (miniPointerId === null || event.pointerId === miniPointerId)) {
+            if (!miniDragMoved && Math.hypot(event.clientX - miniDragStartX, event.clientY - miniDragStartY) > 5) {
+                miniDragMoved = true;
+            }
+            if (miniDragMoved) {
+                applyMiniPos(event.clientX - miniDragOffsetX, event.clientY - miniDragOffsetY);
+            }
+            return;
+        }
         onCanvasPointerMove(event);
     };
 
-    const onWindowPointerUp = () => {
+    const onWindowPointerUp = (event) => {
         if (isDraggingBar) {
             isDraggingBar = false;
         }
-        finishStroke();
+        if (isDraggingMini && (!event || miniPointerId === null || event.pointerId === miniPointerId)) {
+            const shouldRestore = !miniDragMoved && (!event || event.type !== 'pointercancel');
+            isDraggingMini = false;
+            miniPointerId = null;
+            miniDragMoved = false;
+            if (shouldRestore) {
+                isMinimized = false;
+                syncToolbarVisibility();
+                if (toolbarPos) {
+                    applyToolbarPos(toolbarPos.x, toolbarPos.y);
+                }
+            }
+        }
+        if (!event || activePointerId === null || event.pointerId === activePointerId) {
+            finishStroke();
+        }
+    };
+
+    const onWindowPointerDown = (event) => {
+        if (!activePopover) return;
+        const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+        if (path.includes(toolbar) || path.includes(shapePopover) || path.includes(colorPopover) || path.includes(sizePopover)) {
+            return;
+        }
+        closeSubPopover();
     };
 
     const onKeyDown = (event) => {
-        if (event.key === 'Escape' && drawMode) {
-            drawMode = false;
-            finishStroke();
-            syncCanvasInteractive();
-            ctx.ui.toast({ content: ctx.i18n.t('toastPausedMode'), type: 'info' });
+        if (event.key === 'Escape') {
+            if (activePopover) {
+                closeSubPopover();
+                return;
+            }
+            if (drawMode) {
+                drawMode = false;
+                finishStroke();
+                syncCanvasInteractive();
+                ctx.ui.toast({ content: ctx.i18n.t('toastPausedMode'), type: 'info' });
+            }
         }
     };
 
     modeBtn.addEventListener('click', () => {
+        closeSubPopover();
         drawMode = !drawMode;
         if (!drawMode) finishStroke();
         syncCanvasInteractive();
@@ -724,21 +1267,52 @@ export default function activate(ctx) {
         });
     });
 
+    shapeBtn.addEventListener('click', () => {
+        setActiveTool(activeShape);
+        toggleSubPopover('shape');
+    });
+    colorBtn.addEventListener('click', () => toggleSubPopover('color'));
+    sizeBtn.addEventListener('click', () => toggleSubPopover('size'));
     sizeSlider.addEventListener('input', (e) => setBrushSize(e.target.value));
-    undoBtn.addEventListener('click', undo);
-    clearBtn.addEventListener('click', () => clearAll(true));
+    undoBtn.addEventListener('click', () => {
+        closeSubPopover();
+        undo();
+    });
+    clearBtn.addEventListener('click', () => {
+        closeSubPopover();
+        clearAll(true);
+    });
+    minimizeBtn.addEventListener('click', () => {
+        isMinimized = true;
+        if (!miniPos) {
+            const rect = toolbar.getBoundingClientRect();
+            const initX = rect.width > 0 ? rect.right - 46 : window.innerWidth - 58;
+            const initY = rect.height > 0 ? rect.top : window.innerHeight - 54;
+            applyMiniPos(initX, initY);
+        } else {
+            applyMiniPos(miniPos.x, miniPos.y);
+        }
+        syncToolbarVisibility();
+    });
+    miniFab.addEventListener('pointerdown', onMiniPointerDown);
     grip.addEventListener('pointerdown', onGripPointerDown);
     previewCanvas.addEventListener('pointerdown', onCanvasPointerDown);
 
+    window.addEventListener('pointerdown', onWindowPointerDown);
     window.addEventListener('pointermove', onWindowPointerMove);
     window.addEventListener('pointerup', onWindowPointerUp);
     window.addEventListener('pointercancel', onWindowPointerUp);
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('resize', resizeCanvases);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', resizeCanvases);
+    }
 
     ctx.events.on('playback:state-changed', ({ isPlaying }) => {
         if (isPlaying) {
-            finishStroke();
+            if (!settings.allowDrawWhilePlaying || settings.clearOnPlay) {
+                finishStroke();
+            }
             if (settings.clearOnPlay) {
                 clearAll(false);
             }
@@ -751,7 +1325,8 @@ export default function activate(ctx) {
         label: '顯示或隱藏工具列',
         labelKey: `ext.${EXTENSION_ID}.menuToggleBar`,
         onClick: () => {
-            toolbar.classList.toggle('hidden');
+            isToolbarVisible = !isToolbarVisible;
+            syncToolbarVisibility();
         }
     });
 
@@ -776,7 +1351,13 @@ export default function activate(ctx) {
                     if (key === 'defaultSize') {
                         setBrushSize(allValues.defaultSize);
                     }
-                    toolbar.classList.toggle('hidden', !allValues.showToolbar);
+                    if (key === 'showToolbar') {
+                        isToolbarVisible = Boolean(allValues.showToolbar);
+                        syncToolbarVisibility();
+                    }
+                    if (key === 'allowDrawWhilePlaying') {
+                        syncCanvasInteractive();
+                    }
                 }
             });
         }
@@ -787,17 +1368,22 @@ export default function activate(ctx) {
     setBrushColor(PRESET_COLORS[0]);
     setBrushSize(brushSize);
     updateUndoState();
-    toolbar.classList.toggle('hidden', !settings.showToolbar);
+    syncToolbarVisibility();
     syncCanvasInteractive();
     requestAnimationFrame(centerToolbarBottom);
 
     return () => {
         finishStroke();
+        miniFab.removeEventListener('pointerdown', onMiniPointerDown);
         previewCanvas.removeEventListener('pointerdown', onCanvasPointerDown);
+        window.removeEventListener('pointerdown', onWindowPointerDown);
         window.removeEventListener('pointermove', onWindowPointerMove);
         window.removeEventListener('pointerup', onWindowPointerUp);
         window.removeEventListener('pointercancel', onWindowPointerUp);
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('resize', resizeCanvases);
+        if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', resizeCanvases);
+        }
     };
 }

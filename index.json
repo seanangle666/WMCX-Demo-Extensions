@@ -14,11 +14,11 @@
         },
         {
             "id": "com.wmcx.chart-brush",
-            "name": "譜面暫停繪圖筆刷",
-            "version": "1.0.0",
+            "name": "畫筆工具",
+            "version": "1.1.0",
             "description": "於譜面暫停狀態提供多種筆刷與橡皮擦進行標記繪圖，開始播放時自動清除。",
-            "file": "Extensions/chart-brush-1.0.0.zip",
-            "sha256": "bf6cb593970bb3f57e03e25eb5d4d6056d2d35d3df0c39a781e154ce7bb72518"
+            "file": "Extensions/chart-brush-1.1.0.zip",
+            "sha256": "76d53aeef28ee53176255f6f6b358926b3a56786a83c2797f9db6fe088b9f7ec"
         },
         {
             "id": "com.wmcx.dvd-bounce",
