@@ -6,8 +6,9 @@
 
 - 編輯器網站：https://susuy0725.github.io/web-mai-chart-x/
 - 源專案倉庫：https://github.com/Susuy0725/web-mai-chart-x
-- 擴充程式開發手冊：[繁體中文](https://seanangle666.github.io/wmcxExt/) · [English](https://seanangle666.github.io/wmcxExt/en/) · [日本語](https://seanangle666.github.io/wmcxExt/ja/) · [简体中文](https://seanangle666.github.io/wmcxExt/zh-CN/) · [한국어](https://seanangle666.github.io/wmcxExt/ko/)
-- WERP 安裝索引：[index.json](https://seanangle666.github.io/wmcxExt/index.json)
+- [示範擴充程式的 GitHub 儲存庫](https://github.com/seanangle666/WMCX-Demo-Extensions)
+- 擴充程式開發手冊：[繁體中文](https://seanangle666.github.io/WMCX-Demo-Extensions/) · [English](https://seanangle666.github.io/WMCX-Demo-Extensions/en/) · [日本語](https://seanangle666.github.io/WMCX-Demo-Extensions/ja/) · [简体中文](https://seanangle666.github.io/WMCX-Demo-Extensions/zh-CN/) · [한국어](https://seanangle666.github.io/WMCX-Demo-Extensions/ko/)
+- WERP 安裝索引：[index.json](https://seanangle666.github.io/WMCX-Demo-Extensions/index.json)
 
 ## 目錄結構
 
