@@ -1,12 +1,11 @@
-# WMCX Example Extensions
+# WMCX Demo Extensions
 
-本倉庫為 [Web mai Chart X](https://susuy0725.github.io/web-mai-chart-x/) 的擴充程式範例與發布集合，所有外掛皆依據源專案的擴充系統規格開發。
+本倉庫為 [Web mai Chart X](https://susuy0725.github.io/web-mai-chart-x/) 的官方展示擴充程式發布集合，皆依據源專案的擴充系統規格開發。
 
 ## 相關連結
 
 - 編輯器網站：https://susuy0725.github.io/web-mai-chart-x/
-- 源專案倉庫：https://github.com/Susuy0725/web-mai-chart-x
-- [示範擴充程式的 GitHub 儲存庫](https://github.com/seanangle666/WMCX-Demo-Extensions)
+- Web mai Chart X 倉庫：https://github.com/Susuy0725/web-mai-chart-x
 - 擴充程式開發手冊：[繁體中文](https://seanangle666.github.io/WMCX-Demo-Extensions/) · [English](https://seanangle666.github.io/WMCX-Demo-Extensions/en/) · [日本語](https://seanangle666.github.io/WMCX-Demo-Extensions/ja/) · [简体中文](https://seanangle666.github.io/WMCX-Demo-Extensions/zh-CN/) · [한국어](https://seanangle666.github.io/WMCX-Demo-Extensions/ko/)
 - WERP 安裝索引：[index.json](https://seanangle666.github.io/WMCX-Demo-Extensions/index.json)
 
