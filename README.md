@@ -6,7 +6,8 @@
 
 - 編輯器網站：https://susuy0725.github.io/web-mai-chart-x/
 - 源專案倉庫：https://github.com/Susuy0725/web-mai-chart-x
-- 擴充程式開發手冊：https://github.com/Susuy0725/web-mai-chart-x/blob/main/docs/EXTENSIONS.md
+- 擴充程式開發手冊：[繁體中文](https://seanangle666.github.io/wmcxExt/) · [English](https://seanangle666.github.io/wmcxExt/en/) · [日本語](https://seanangle666.github.io/wmcxExt/ja/) · [简体中文](https://seanangle666.github.io/wmcxExt/zh-CN/) · [한국어](https://seanangle666.github.io/wmcxExt/ko/)
+- WERP 安裝索引：[index.json](https://seanangle666.github.io/wmcxExt/index.json)
 
 ## 目錄結構
 
@@ -32,6 +33,10 @@
 3. 點選「管理擴充程式」，再點擊右下角「匯入擴充程式」。
 4. 選取 `Extensions/` 目錄下的任一 `.zip` 檔案。
 5. 確認權限清單後點選「安裝並啟用」即可使用。
+
+## 開發者手冊
+
+手冊首頁與詞條資料位於 `manual/index.html` 和 `manual/docData.mjs`，其他四種語言的譯文位於 `manual/locales/`。在倉庫根目錄執行 `node manual/build.mjs` 以產生並驗證五個版本，再以靜態伺服器預覽 `dist/`。在 GitHub 的 **Settings → Pages → Source** 選擇 **GitHub Actions**；推送至 `main` 後，Pages 工作流程會將手冊、WERP 索引與範例套件一起發布。
 
 ## 開發與打包
 
