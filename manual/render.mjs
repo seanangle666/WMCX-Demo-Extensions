@@ -722,7 +722,7 @@ function renderItemHtml(item, itemIndex) {
             <a href="./index.html" class="doc-brand" id="brandHomeLink">
                 <img src="./favicon.png" alt="Web mai Chart X" width="24" height="24" class="doc-brand-icon">
                 <span class="doc-brand-title">WMCX</span>
-                <span class="doc-brand-badge">Plugin API</span>
+                <span class="doc-brand-badge">Extension API</span>
             </a>
         </div>
 
